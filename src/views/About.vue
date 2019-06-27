@@ -63,7 +63,9 @@ export default {
             "If you know how to manage right and left click simultaneously, contact me",
             "<span>Why this logo? Because it's made with <a href='https://vuejs.org/' target='_blank' title='Vue.js'><img width='24px' src='https://vuejs.org/images/logo.png?_sw-precache=cf23526f451784ff137f161b8fe18d5a'/></a></span>",
             "---",
-            "<span><u>Upcoming:</u> Scores saving and best scores board</span>"
+            "<span><u>Upcoming:</u> Scores saving and best scores board</span>",
+            "---",
+            "<span>-- <a href='https://github.com/rm-info/minesweeper-vuejs.git' target='_blank'>Github Repo</a> --</span>",
           ],
         },
       ]
