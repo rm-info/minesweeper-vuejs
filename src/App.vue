@@ -1,8 +1,11 @@
 <template>
   <v-app>
     <v-toolbar app>
+      <v-btn flat disabled fab>
+        <v-img :src="require('./assets/logo.png')"></v-img>
+      </v-btn>
       <v-toolbar-title class="headline text-uppercase">
-        <v-btn flat large to="/">Home</v-btn>
+        <v-btn flat large to="/">Play</v-btn>
         <v-btn flat large to="/about"><span class="font-weight-light">About</span></v-btn>
       </v-toolbar-title>
       <v-spacer></v-spacer>

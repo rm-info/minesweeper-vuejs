@@ -15,18 +15,20 @@
             <v-text-field v-model.number="percMines.value" label="% of mines" required :error-messages="percMinesErrors" type="number"
             @input="$v.percMines.value.$touch()" @blur="$v.percMines.value.$touch()"></v-text-field>
           </v-flex>
-          <v-flex>
+          <v-flex class="text-xs-center">
             <v-btn color="success" type="submit">Start</v-btn>
             <v-btn color="error" @click="resetToDefault()">Reset</v-btn>
             <v-btn color="warning" @click="solveGame()">Solve</v-btn>
           </v-flex>
+          <v-flex class="text-xs-center">
+            <span>
+              <v-btn @click="zoom < 4 ? zoom+=0.5 : zoom=4.5" icon><v-icon>zoom_in</v-icon></v-btn>
+              {{zoom-0.5 | dec2}}x
+              <v-btn @click="zoom > 2 ? zoom-=0.5 : zoom=1.5" icon><v-icon>zoom_out</v-icon></v-btn>
+            </span>
+          </v-flex>
         </v-layout>
       </v-form>
-      <span style="z-index:2;position:fixed;right:0;top:0">
-        <v-btn @click="zoom < 4 ? zoom+=0.5 : zoom=4.5" icon><v-icon>zoom_in</v-icon></v-btn>
-        {{zoom-0.5 | dec2}}x
-        <v-btn @click="zoom > 2 ? zoom-=0.5 : zoom=1.5" icon><v-icon>zoom_out</v-icon></v-btn>
-      </span>
 
     </v-container>
     <v-container grid-list-xs>
@@ -57,7 +59,7 @@
                 @click.left.prevent="consoleLog('left click');flipCell(cell)"
                 @click.right.prevent="consoleLog('right click');flagCell(cell)"
                 @click.middle.prevent="consoleLog('middle click');discoverAroundCells(cell)"
-                 :title="'('+cell.coord.x+','+cell.coord.y+')'">
+              >
                 <span v-if="!cell.flipped">
                   <v-icon v-if="cell.icon" class="cellIcon pa-0 ma-0" :style="{fontSize:zoom+'em'}">{{cell.icon}}</v-icon>
                   <span v-if="cell.value > 0" :style="{fontSize:zoom+'em'}">{{cell.value}}</span>
@@ -69,7 +71,7 @@
             </td>
           </tr>
         </table>
-        <h1 class="display-3 ma-5 pa-5" v-if="board.length===0">Click on Start to play!</h1>
+        <h1 class="display-3 ma-5 pa-5 text-xs-center" v-if="board.length===0">Click on Start to play!</h1>
       </v-layout>
     </v-container>
   </v-content>
