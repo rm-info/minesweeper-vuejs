@@ -2,23 +2,13 @@
   <v-app>
     <v-toolbar app>
       <v-toolbar-title class="headline text-uppercase">
-        <span>Vuetify</span>
-        <span class="font-weight-light">MATERIAL DESIGN</span>
+        <v-btn flat large to="/">Home</v-btn>
+        <v-btn flat large to="/about"><span class="font-weight-light">About</span></v-btn>
       </v-toolbar-title>
       <v-spacer></v-spacer>
-      <v-btn
-        flat
-        href="https://github.com/vuetifyjs/vuetify/releases/latest"
-        target="_blank"
-      >
-        <span class="mr-2">Latest Release</span>
-      </v-btn>
-      <router-link to="/">Home</router-link> |
-      <router-link to="/about">About</router-link>
-
     </v-toolbar>
-
     <v-content>
+      <h1 class="display-2 text-xs-center pt-3">Minesweeper</h1>
       <router-view/>
     </v-content>
   </v-app>
