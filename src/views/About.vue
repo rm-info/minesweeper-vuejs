@@ -45,7 +45,7 @@ export default {
             "---",
             "<span><b>Left click</b> on the tile you want to reveal</span>",
             "<span><b>Right click</b> on a tile to set a flag, meaning you think there's a mine there</span>",
-            "<span><b>Middle click</b> on a revealed tile to find out what's around</span>",
+            "<span><b>Middle click</b> or <b>Double click</b> on a revealed tile to find out what's around</span>",
             "---",
             "<span><b>Start</b> cancels any current game and starts a new one with custom settings</span>",
             "<span><b>Reset</b> cancels any current game and reset the settings to default</span>",

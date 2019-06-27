@@ -4,14 +4,16 @@
       <v-form @submit.prevent="startNewGame()">
         <v-layout row wrap justify-center>
           <v-flex>
-            <v-text-field v-model.number="width.value" label="Width" clearable validate-on-blur
-            :rules="width.rules"></v-text-field>
+            <v-text-field v-model.number="width.value" label="Width" required :error-messages="widthErrors" type="number"
+            @input="$v.width.value.$touch()" @blur="$v.width.value.$touch()"></v-text-field>
           </v-flex>
           <v-flex>
-            <v-text-field v-model.number="height.value" label="Height"></v-text-field>
+            <v-text-field v-model.number="height.value" label="Height" required :error-messages="heightErrors" type="number"
+            @input="$v.height.value.$touch()" @blur="$v.height.value.$touch()"></v-text-field>
           </v-flex>
           <v-flex>
-            <v-text-field v-model.number="percMines.value" label="% of mines"></v-text-field>
+            <v-text-field v-model.number="percMines.value" label="% of mines" required :error-messages="percMinesErrors" type="number"
+            @input="$v.percMines.value.$touch()" @blur="$v.percMines.value.$touch()"></v-text-field>
           </v-flex>
           <v-flex>
             <v-btn color="success" type="submit">Start</v-btn>
@@ -51,9 +53,10 @@
             <td v-for="(cell, idy) in line" :key="idy" class="pa-0 ma-0">
               <v-btn :color="!cell.flipped ? cell.color : 'grey'" small class="pa-0 ma-0 cell" 
                 :style="{minWidth:zoom+'em',minHeight:zoom+'em',width:zoom+'em',height:zoom+'em',maxWidth:zoom+'em',maxHeight:zoom+'em'}" 
-                @click.left="flipCell(cell)"
-                @click.right.prevent="flagCell(cell)"
-                @click.middle.prevent="discoverAroundCells(cell)"
+                @dblclick.left.prevent="consoleLog('dbl click');discoverAroundCells(cell)"
+                @click.left.prevent="consoleLog('left click');flipCell(cell)"
+                @click.right.prevent="consoleLog('right click');flagCell(cell)"
+                @click.middle.prevent="consoleLog('middle click');discoverAroundCells(cell)"
                  :title="'('+cell.coord.x+','+cell.coord.y+')'">
                 <span v-if="!cell.flipped">
                   <v-icon v-if="cell.icon" class="cellIcon pa-0 ma-0" :style="{fontSize:zoom+'em'}">{{cell.icon}}</v-icon>
@@ -75,16 +78,24 @@
 <script>
   import HelloWorld from '../components/HelloWorld'
   import { setInterval, clearInterval } from 'timers';
+  import { validationMixin } from 'vuelidate';
+  import { required, numeric, between } from 'vuelidate/lib/validators';
+  import { consoleLog } from '@/main';
 
   export default {
     components: {
     },
+    mixins: [validationMixin],
+    validations: {
+      width: {value: { required, numeric, between: between(2,40) }},
+      height: {value: { required, numeric, between: between(2,40) }},
+      percMines : {value: { required, numeric, between: between(1,100) }},
+    },
     data () {
       return {
-        width: {value:10, rules:[], default:10},
-        height: {value:10, rules:[], default:10},
-        defHeight: 10,
-        percMines: {value:10, rules:[], default:10},
+        width: {value:10, default:10},
+        height: {value:10, default:10},
+        percMines: {value:10, default:10},
         board:[],
         zoom:1.5,
         nbMinesLeft:null,
@@ -93,6 +104,32 @@
         time:null,
         stopTime:null,
       }
+    },
+    computed: {
+      widthErrors () {
+        const errors = [];
+        if (!this.$v.width.value.$dirty) return errors;
+        !this.$v.width.value.required && errors.push('is required and must be numeric');
+        !this.$v.width.value.numeric && errors.push('must be a positive integer');
+        !this.$v.width.value.between && errors.push('must be between 2 and 40');
+        return errors;
+      },
+      heightErrors () {
+        const errors = [];
+        if (!this.$v.height.value.$dirty) return errors;
+        !this.$v.height.value.required && errors.push('is required and must be numeric');
+        !this.$v.height.value.numeric && errors.push('must be a positive integer');
+        !this.$v.height.value.between && errors.push('must be between 2 and 40');
+        return errors;
+      },
+      percMinesErrors () {
+        const errors = [];
+        if (!this.$v.percMines.value.$dirty) return errors;
+        !this.$v.percMines.value.required && errors.push('is required and must be numeric');
+        !this.$v.percMines.value.numeric && errors.push('must be a positive integer');
+        !this.$v.percMines.value.between && errors.push('must be between 1 and 100');
+        return errors;
+      },
     },
     filters: {
       dec2 (e) {
@@ -108,6 +145,9 @@
     },
     methods: {
       startNewGame() {
+        this.$v.$touch();
+        if (this.widthErrors.length || this.heightErrors.length || this.percMinesErrors.length)  return;
+
         this.board = [];
         for (let i = 0; i < this.height.value; i++) {
           this.board.push([]);
@@ -117,10 +157,10 @@
         }
         if (this.percMines.value > 100)  this.percMines.value = 100;
         if (this.percMines.value < 1)  this.percMines.value = 1;
-        console.log("percMines",this.percMines.value, typeof this.percMines.value, this.percMines.value/100);
-        console.log("width x height", this.width.value, 'x', this.height.value);
+        consoleLog("percMines",this.percMines.value, typeof this.percMines.value, this.percMines.value/100);
+        consoleLog("width x height", this.width.value, 'x', this.height.value);
         this.nbMinesLeft = Math.ceil((this.percMines.value/100)*this.width.value*this.height.value);
-        console.log("minesLeft",this.nbMinesLeft);
+        consoleLog("minesLeft",this.nbMinesLeft);
         this.gameOver = false;
         this.gameWon = false;
         this.time = 0;
@@ -128,6 +168,8 @@
         this.initBoard();
       },
       resetToDefault() {
+        this.$v.$reset();
+
         this.width.value = this.width.default;
         this.height.value = this.height.default;
         this.percMines.value = this.percMines.default;
@@ -139,7 +181,6 @@
         clearInterval(this.stopTime);
       },
       aroundCells (cell) {
-        debugger;
         let x = cell.coord.x;
         let y = cell.coord.y;
         let initCoords = [{x:x-1,y:y-1},{x:x,y:y-1},{x:x+1,y:y-1},{x:x-1,y:y},{x:x+1,y:y},{x:x-1,y:y+1},{x:x,y:y+1},{x:x+1,y:y+1}];
@@ -149,21 +190,21 @@
             aroundCells.push(this.board[coord.y][coord.x]);
           }
         });      
-        // console.log("aroundCells.size:",aroundCells.length);  
-        // console.log("aroundCells:",aroundCells);  
+        // consoleLog("aroundCells.size:",aroundCells.length);  
+        // consoleLog("aroundCells:",aroundCells);  
         return aroundCells;
       },
       initBoard() {
-        // console.log("init Board");
+        // consoleLog("init Board");
         let i = 0;
         while (i < this.nbMinesLeft) {  // while we still have mines to put on the field
           // calculate a new position somewhere in the array
           let newMine = Math.floor(Math.random()*Math.floor(this.width.value*this.height.value)); 
-          // console.log("Mine pos:",newMine);
+          // consoleLog("Mine pos:",newMine);
           // deduce the coordinates (this way we only call random once which I assume is pretty expensive (more than floor anyway))
           let y = Math.floor(newMine/this.width.value);
           let x = newMine-Math.floor(newMine/this.width.value)*this.width.value;
-          // console.log("x:y=",x,":",y);
+          // consoleLog("x:y=",x,":",y);
           let cell = this.board[y][x];
           if (cell.value !== '-1') {  // if the cell doesn't already have a mine,
             cell.value = '-1';        // put it there
@@ -208,7 +249,7 @@
           this.gameOver = true;
           clearInterval(this.stopTime);
           // alert('Game Over!!!');
-          console.log("GameOver!!");
+          consoleLog("GameOver!!");
           return;
         }
         if (cell.value === 0) {     // if empty cell, we discover the cells around
@@ -224,7 +265,6 @@
         cell.flag ? this.nbMinesLeft-- : this.nbMinesLeft++;  // manages the counter according to the new flag
       },
       discoverAroundCells(cell) {
-        console.log("middleClick");
         if (this.gameOver || this.gameWon)  return; // game is over, nothing to do
         if (cell.flipped) return;       // cell not yet discovered, nothing to do
         if (cell.flag) return;          // cell is flagged, nothing to do
@@ -240,12 +280,12 @@
         }
       },
       checkEndOfGame () { // this function checks if every flag has been found at the proper location
-        console.log("checkEndOfGame");
+        consoleLog("checkEndOfGame");
         for (let i = 0; i < this.height.value; i++) {
           for (let j = 0; j < this.width.value; j++) {  // we just run over the whole array
             let cell = this.board[i][j];
             if ((cell.value == -1 && !cell.flag)) { // and check if there's a flag on mined cells
-              console.log("game is not finished because:",cell.value,"!=",-1,"or",cell.flag,"!=",true);
+              consoleLog("game is not finished because:",cell.value,"!=",-1,"or",cell.flag,"!=",true);
               return;   // if not, nothing happens
             }
           }
@@ -259,7 +299,7 @@
             if (cell.value > -1 && cell.flipped)  cell.flipped = !cell.flipped;
           }
         }
-        console.log("You won!");
+        consoleLog("You won!");
       },
       cellClickAction(cell) {
         switch(cell.color) {
@@ -308,6 +348,7 @@
       },
       solveGame () {
         if (!this.board[0]) return;
+        if (this.gameWon) return;
         this.gameOver = true;
         for (let i = 0; i < this.height.value; i++) {
           for (let j = 0; j < this.width.value; j++) {  // we just run over the whole array
@@ -316,6 +357,9 @@
           }
         }
       },
+      consoleLog(log) {
+        consoleLog(log);
+      }
     },
   }
 </script>
