@@ -1,69 +1,82 @@
 <template>
   <v-main class="pa-0 ma-0">
-    <v-container>
+    <v-container fluid class="py-2">
       <v-form @submit.prevent="startNewGame()">
-        <v-row justify="center">
-          <v-col cols="12" sm="4" md="3">
+        <v-row dense justify="center" align="center">
+          <v-col cols="auto">
             <v-text-field
               v-model.number="width.value"
               label="Width"
               type="number"
+              density="compact"
+              hide-details="auto"
               :error-messages="widthErrors"
               @input="v$.width.value.$touch()"
               @blur="v$.width.value.$touch()"
+              style="width: 100px"
             ></v-text-field>
           </v-col>
-          <v-col cols="12" sm="4" md="3">
+          <v-col cols="auto">
             <v-text-field
               v-model.number="height.value"
               label="Height"
               type="number"
+              density="compact"
+              hide-details="auto"
               :error-messages="heightErrors"
               @input="v$.height.value.$touch()"
               @blur="v$.height.value.$touch()"
+              style="width: 100px"
             ></v-text-field>
           </v-col>
-          <v-col cols="12" sm="4" md="3">
+          <v-col cols="auto">
             <v-text-field
               v-model.number="percMines.value"
-              label="% of mines"
+              label="% mines"
               type="number"
+              density="compact"
+              hide-details="auto"
               :error-messages="percMinesErrors"
               @input="v$.percMines.value.$touch()"
               @blur="v$.percMines.value.$touch()"
+              style="width: 100px"
             ></v-text-field>
           </v-col>
-          <v-col cols="12" class="text-center">
-            <v-btn color="success" type="submit">Start</v-btn>
-            <v-btn color="error" @click="resetToDefault()" class="mx-2">Reset</v-btn>
-            <v-btn color="warning" @click="solveGame()">Solve</v-btn>
+          <v-col cols="auto">
+            <v-btn color="success" type="submit" size="small">Start</v-btn>
           </v-col>
-          <v-col cols="12" class="text-center">
-            <v-btn @click="zoom < 4 ? zoom+=0.5 : zoom=4.5" icon>
-              <v-icon>mdi-magnify-plus</v-icon>
+          <v-col cols="auto">
+            <v-btn color="error" @click="resetToDefault()" size="small">Reset</v-btn>
+          </v-col>
+          <v-col cols="auto">
+            <v-btn color="warning" @click="solveGame()" size="small">Solve</v-btn>
+          </v-col>
+          <v-col cols="auto">
+            <v-btn @click="zoom < 4 ? zoom+=0.5 : zoom=4.5" icon size="small" variant="text">
+              <v-icon size="small">mdi-magnify-plus</v-icon>
             </v-btn>
-            <span class="mx-2">{{ dec2(zoom-0.5) }}x</span>
-            <v-btn @click="zoom > 2 ? zoom-=0.5 : zoom=1.5" icon>
-              <v-icon>mdi-magnify-minus</v-icon>
+            <span class="text-caption mx-1">{{ dec2(zoom-0.5) }}x</span>
+            <v-btn @click="zoom > 2 ? zoom-=0.5 : zoom=1.5" icon size="small" variant="text">
+              <v-icon size="small">mdi-magnify-minus</v-icon>
             </v-btn>
           </v-col>
         </v-row>
       </v-form>
     </v-container>
 
-    <v-container>
-      <v-row justify="center">
+    <v-container fluid class="py-1">
+      <v-row dense justify="center" align="center">
         <v-col cols="12" v-if="gameOver && board[0]">
-          <p class="text-h4 text-red text-center">Game Over !</p>
+          <p class="text-h5 text-red text-center ma-0">Game Over !</p>
         </v-col>
         <v-col cols="12" v-if="gameWon">
-          <p class="text-h4 text-success text-center">You Won!</p>
+          <p class="text-h5 text-success text-center ma-0">You Won!</p>
         </v-col>
-        <v-col cols="6" v-if="nbMinesLeft !== null">
-          <p class="text-subtitle-1 text-center">Nb mines left: {{ nbMinesLeft }}</p>
+        <v-col cols="auto" v-if="nbMinesLeft !== null">
+          <span class="text-body-2">💣 {{ nbMinesLeft }}</span>
         </v-col>
-        <v-col cols="6" v-if="time !== null">
-          <p class="text-subtitle-1 text-center">Elapsed time: {{ time }}s</p>
+        <v-col cols="auto" v-if="time !== null">
+          <span class="text-body-2">⏱️ {{ time }}s</span>
         </v-col>
 
         <v-col cols="12" class="d-flex justify-center">
@@ -93,7 +106,7 @@
           </table>
         </v-col>
         <v-col cols="12" v-if="board.length===0">
-          <h1 class="text-h3 text-center">Click on Start to play!</h1>
+          <p class="text-h6 text-center text-grey">Click Start to play</p>
         </v-col>
       </v-row>
     </v-container>

@@ -1,17 +1,15 @@
 <template>
   <v-app>
-    <v-app-bar app>
-      <v-btn icon @click="$router.push('/')" :ripple="false" class="logo-btn">
-        <v-img :src="logo" width="40"></v-img>
+    <v-app-bar app density="compact">
+      <v-btn icon @click="$router.push('/')" :ripple="false" class="logo-btn" size="small">
+        <v-img :src="logo" width="32"></v-img>
       </v-btn>
-      <v-toolbar-title>
-        <v-btn variant="text" size="large" to="/">Play</v-btn>
-        <v-btn variant="text" size="large" to="/about">About</v-btn>
-      </v-toolbar-title>
+      <v-toolbar-title class="text-h6">Minesweeper</v-toolbar-title>
       <v-spacer></v-spacer>
+      <v-btn variant="text" to="/" size="small">Play</v-btn>
+      <v-btn variant="text" to="/about" size="small">About</v-btn>
     </v-app-bar>
     <v-main>
-      <h1 class="text-h3 text-center pt-3">Minesweeper</h1>
       <router-view v-slot="{ Component }">
         <keep-alive>
           <component :is="Component" />
