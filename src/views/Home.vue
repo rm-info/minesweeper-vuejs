@@ -101,7 +101,7 @@
 </template>
 
 <script setup>
-import { ref, reactive, computed, watch } from 'vue'
+import { ref, reactive, computed, watch, onActivated, onDeactivated } from 'vue'
 import { useVuelidate } from '@vuelidate/core'
 import { required, numeric, between } from '@vuelidate/validators'
 
@@ -119,6 +119,7 @@ const gameOver = ref(true)
 const gameWon = ref(false)
 const time = ref(null)
 const stopTime = ref(null)
+const isPaused = ref(false)
 
 // Validation rules
 const rules = {
@@ -247,9 +248,33 @@ function initBoard() {
     }
   }
   stopTime.value = setInterval(() => {
-    time.value++
+    if (!isPaused.value) {
+      time.value++
+    }
   }, 1000)
 }
+
+function pauseGame() {
+  if (!gameOver.value && !gameWon.value && time.value !== null) {
+    isPaused.value = true
+  }
+}
+
+function resumeGame() {
+  if (!gameOver.value && !gameWon.value && time.value !== null) {
+    isPaused.value = false
+  }
+}
+
+// Pause game when component is deactivated (navigating away)
+onDeactivated(() => {
+  pauseGame()
+})
+
+// Resume game when component is reactivated (coming back)
+onActivated(() => {
+  resumeGame()
+})
 
 function setColor(cell) {
   switch (cell.value) {
@@ -342,8 +367,8 @@ function solveGame() {
 <style lang="scss" scoped>
 .cell {
   padding: 0 !important;
-  margin: 0 !important;
-  border-radius: 0 !important;
+  margin: 1px !important;
+  border-radius: 4px !important;
   min-width: unset !important;
   min-height: unset !important;
 }

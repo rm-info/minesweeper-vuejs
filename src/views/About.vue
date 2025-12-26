@@ -30,9 +30,7 @@ const topics = [
       "A field is full of mines waiting for your foot pushing it to blow up.",
       "Find all the mines to win",
       "Don't die..",
-      "Play again to try to beat the clock",
-      "---",
-      "<span><u>Don't come here while your game is on, because you'll lose everything!</u></span>"
+      "Play again to try to beat the clock"
     ],
   },
   {
