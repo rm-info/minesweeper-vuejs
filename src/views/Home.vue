@@ -53,12 +53,12 @@
         <table class="pa-0 ma-0">
           <tr v-for="(line, idx) in board" :key="idx" class="pa-0 ma-0">
             <td v-for="(cell, idy) in line" :key="idy" class="pa-0 ma-0">
-              <v-btn :color="!cell.flipped ? cell.color : 'grey'" small class="pa-0 ma-0 cell" 
-                :style="{minWidth:zoom+'em',minHeight:zoom+'em',width:zoom+'em',height:zoom+'em',maxWidth:zoom+'em',maxHeight:zoom+'em'}" 
-                @dblclick.left.prevent="consoleLog('dbl click');discoverAroundCells(cell)"
-                @click.left.prevent="consoleLog('left click');flipCell(cell)"
-                @click.right.prevent="consoleLog('right click');flagCell(cell)"
-                @click.middle.prevent="consoleLog('middle click');discoverAroundCells(cell)"
+              <v-btn :color="!cell.flipped ? cell.color : 'grey'" small class="pa-0 ma-0 cell"
+                :style="{minWidth:zoom+'em',minHeight:zoom+'em',width:zoom+'em',height:zoom+'em',maxWidth:zoom+'em',maxHeight:zoom+'em'}"
+                @dblclick.left.prevent="discoverAroundCells(cell)"
+                @click.left.prevent="flipCell(cell)"
+                @click.right.prevent="flagCell(cell)"
+                @click.middle.prevent="discoverAroundCells(cell)"
               >
                 <span v-if="!cell.flipped">
                   <v-icon v-if="cell.icon" class="cellIcon pa-0 ma-0" :style="{fontSize:zoom+'em'}">{{cell.icon}}</v-icon>
@@ -78,11 +78,12 @@
 </template>
 
 <script>
-  import HelloWorld from '../components/HelloWorld'
-  import { setInterval, clearInterval } from 'timers';
   import { validationMixin } from 'vuelidate';
   import { required, numeric, between } from 'vuelidate/lib/validators';
   import { consoleLog } from '@/main';
+
+  const MINE_VALUE = -1;
+  const EMPTY_CELL = 0;
 
   export default {
     components: {
@@ -140,7 +141,7 @@
     },
     watch: {
       nbMinesLeft (val) {
-        if (val == 0) {
+        if (val === 0) {
           this.checkEndOfGame();
         }
       },
@@ -154,15 +155,10 @@
         for (let i = 0; i < this.height.value; i++) {
           this.board.push([]);
           for (let j = 0; j < this.width.value; j++) {
-            this.board[i].push({value:0, icon:'', color:"green lighten-4", flipped:true, coord:{x:j, y:i}, flag:false});
+            this.board[i].push({value:EMPTY_CELL, icon:'', color:"green lighten-4", flipped:true, coord:{x:j, y:i}, flag:false});
           }
         }
-        if (this.percMines.value > 100)  this.percMines.value = 100;
-        if (this.percMines.value < 1)  this.percMines.value = 1;
-        consoleLog("percMines",this.percMines.value, typeof this.percMines.value, this.percMines.value/100);
-        consoleLog("width x height", this.width.value, 'x', this.height.value);
         this.nbMinesLeft = Math.ceil((this.percMines.value/100)*this.width.value*this.height.value);
-        consoleLog("minesLeft",this.nbMinesLeft);
         this.gameOver = false;
         this.gameWon = false;
         this.time = 0;
@@ -191,29 +187,24 @@
           if (coord.x >= 0 && coord.x < this.width.value && coord.y >= 0 && coord.y < this.height.value) {
             aroundCells.push(this.board[coord.y][coord.x]);
           }
-        });      
-        // consoleLog("aroundCells.size:",aroundCells.length);  
-        // consoleLog("aroundCells:",aroundCells);  
+        });
         return aroundCells;
       },
       initBoard() {
-        // consoleLog("init Board");
         let i = 0;
         while (i < this.nbMinesLeft) {  // while we still have mines to put on the field
           // calculate a new position somewhere in the array
-          let newMine = Math.floor(Math.random()*Math.floor(this.width.value*this.height.value)); 
-          // consoleLog("Mine pos:",newMine);
+          let newMine = Math.floor(Math.random()*Math.floor(this.width.value*this.height.value));
           // deduce the coordinates (this way we only call random once which I assume is pretty expensive (more than floor anyway))
           let y = Math.floor(newMine/this.width.value);
           let x = newMine-Math.floor(newMine/this.width.value)*this.width.value;
-          // consoleLog("x:y=",x,":",y);
           let cell = this.board[y][x];
-          if (cell.value !== '-1') {  // if the cell doesn't already have a mine,
-            cell.value = '-1';        // put it there
+          if (cell.value !== MINE_VALUE) {  // if the cell doesn't already have a mine,
+            cell.value = MINE_VALUE;        // put it there
             cell.icon = 'whatshot';
             cell.color = 'warning';
             this.aroundCells(cell).forEach((newCell) => {
-              if (newCell.value > -1) { // then update the cells around so they know the new mine is close.
+              if (newCell.value > MINE_VALUE) { // then update the cells around so they know the new mine is close.
                 newCell.value++;
                 this.setColor(newCell); // and update the color at the same time.
               }
@@ -227,7 +218,7 @@
       },
       setColor(cell) {
         switch(cell.value) {  // select the good background color according to the value of the cell
-          case 0: cell.color = "green lighten-4"; break;
+          case EMPTY_CELL: cell.color = "green lighten-4"; break;
           case 1: cell.color = "green lighten-3"; break;
           case 2: cell.color = "green lighten-2"; break;
           case 3: cell.color = "green lighten-1"; break;
@@ -241,20 +232,16 @@
       flipCell(cell) {  // this function "flips" the tile over to reveal its content
         if (this.gameOver || this.gameWon)  return; // game is over or won, nothing to do
         if (!cell.flipped)  return; // cell is already flipped over, nothing to do
-        if (cell.flag) {            // cell is flagged, 
-          // cell.flag = !cell.flag;   // we give a chance and just unflag.
-          // this.nbMinesLeft++;       // and increase the number of left mines otherwise there's no end..
+        if (cell.flag) {            // cell is flagged,
           return;                   // nothing to do
         }
         cell.flipped = false;       // flip the cell
-        if (cell.value == -1) {     // if it's a mine BOUM!
+        if (cell.value === MINE_VALUE) {     // if it's a mine BOUM!
           this.gameOver = true;
           clearInterval(this.stopTime);
-          // alert('Game Over!!!');
-          consoleLog("GameOver!!");
           return;
         }
-        if (cell.value === 0) {     // if empty cell, we discover the cells around
+        if (cell.value === EMPTY_CELL) {     // if empty cell, we discover the cells around
           this.aroundCells(cell).forEach((newCell) => {
             this.flipCell(newCell);  // with recursivity
           });
@@ -275,19 +262,17 @@
         aroundCells.forEach((newCell) => {
           if (newCell.flag) foundFlags++;
         });
-        if (cell.value == foundFlags) {
+        if (cell.value === foundFlags) {
           aroundCells.forEach((newCell) => {
             this.flipCell(newCell);
           });
         }
       },
       checkEndOfGame () { // this function checks if every flag has been found at the proper location
-        consoleLog("checkEndOfGame");
         for (let i = 0; i < this.height.value; i++) {
           for (let j = 0; j < this.width.value; j++) {  // we just run over the whole array
             let cell = this.board[i][j];
-            if ((cell.value == -1 && !cell.flag)) { // and check if there's a flag on mined cells
-              consoleLog("game is not finished because:",cell.value,"!=",-1,"or",cell.flag,"!=",true);
+            if ((cell.value === MINE_VALUE && !cell.flag)) { // and check if there's a flag on mined cells
               return;   // if not, nothing happens
             }
           }
@@ -298,54 +283,8 @@
         for (let i = 0; i < this.height.value; i++) {
           for (let j = 0; j < this.width.value; j++) {  // we just run over the whole array
             let cell = this.board[i][j];
-            if (cell.value > -1 && cell.flipped)  cell.flipped = !cell.flipped;
+            if (cell.value > MINE_VALUE && cell.flipped)  cell.flipped = !cell.flipped;
           }
-        }
-        consoleLog("You won!");
-      },
-      cellClickAction(cell) {
-        switch(cell.color) {
-          case "success":
-            cell.color = "primary";
-            cell.icon = "flag";
-            break;
-          case "primary":
-            cell.color = "error";
-            cell.icon = "";
-            break;
-          case "error":
-            cell.color = "warning";
-            cell.icon = "whatshot";
-            break;
-          case "warning":
-            cell.color = "info";
-            cell.icon = "looks_one";
-            break;
-          case "info":
-            switch(cell.icon) {
-              case "looks_one":
-                cell.icon = "looks_two";
-              break;
-              case "looks_two":
-                cell.icon = "looks_3";
-              break;
-              case "looks_3":
-                cell.icon = "looks_4";
-              break;
-              case "looks_4":
-                cell.icon = "looks_5";
-              break;
-              case "looks_5":
-                cell.icon = "looks_6";
-              break;
-              default:
-                cell.color = "success";
-                cell.icon = "";
-            }
-            break;
-          default:
-            cell.color = "success";
-            cell.icon = "";
         }
       },
       solveGame () {
@@ -358,25 +297,9 @@
             cell.flipped = false;
           }
         }
-      },
-      consoleLog(log) {
-        consoleLog(log);
       }
     },
   }
 </script>
 <style lang="scss" scoped>
-  // $val:1.6em;
-  // .cell {
-  //   min-width:$val;
-  //   width:$val;
-  //   max-width:$val;
-  //   min-height:$val;
-  //   height:$val;
-  //   max-height:$val;  
-  // }
-
-  // .cellIcon {
-  //   font-size: $val;
-  // }
 </style>
