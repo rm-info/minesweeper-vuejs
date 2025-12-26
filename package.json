@@ -1,34 +1,25 @@
 {
   "name": "minesweeper",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "private": true,
+  "type": "module",
   "scripts": {
-    "serve": "vue-cli-service serve",
-    "build": "vue-cli-service build"
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
   },
   "dependencies": {
-    "vue": "^2.6.10",
-    "vue-router": "^3.0.3",
-    "vuelidate": "^0.7.4",
-    "vuetify": "^1.5.5"
+    "vue": "^3.5.13",
+    "vue-router": "^4.5.0",
+    "@vuelidate/core": "^2.0.3",
+    "@vuelidate/validators": "^2.0.4",
+    "vuetify": "^3.7.5",
+    "@mdi/font": "^7.4.47"
   },
   "devDependencies": {
-    "@vue/cli-service": "^3.8.0",
-    "node-sass": "^4.9.0",
-    "sass-loader": "^7.1.0",
-    "stylus": "^0.54.5",
-    "stylus-loader": "^3.0.1",
-    "vue-cli-plugin-vuetify": "^0.5.0",
-    "vue-template-compiler": "^2.6.10",
-    "vuetify-loader": "^1.0.5"
-  },
-  "postcss": {
-    "plugins": {
-      "autoprefixer": {}
-    }
-  },
-  "browserslist": [
-    "> 1%",
-    "last 2 versions"
-  ]
+    "@vitejs/plugin-vue": "^5.2.1",
+    "vite": "^6.0.5",
+    "vite-plugin-vuetify": "^2.0.4",
+    "sass": "^1.83.0"
+  }
 }

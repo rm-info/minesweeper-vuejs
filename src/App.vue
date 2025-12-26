@@ -1,31 +1,22 @@
 <template>
   <v-app>
-    <v-toolbar app>
-      <v-btn flat disabled fab>
-        <v-img :src="require('./assets/logo.png')"></v-img>
+    <v-app-bar app>
+      <v-btn icon disabled>
+        <v-img :src="logo" width="40"></v-img>
       </v-btn>
-      <v-toolbar-title class="headline text-uppercase">
-        <v-btn flat large to="/">Play</v-btn>
-        <v-btn flat large to="/about"><span class="font-weight-light">About</span></v-btn>
+      <v-toolbar-title>
+        <v-btn variant="text" size="large" to="/">Play</v-btn>
+        <v-btn variant="text" size="large" to="/about">About</v-btn>
       </v-toolbar-title>
       <v-spacer></v-spacer>
-    </v-toolbar>
-    <v-content>
-      <h1 class="display-2 text-xs-center pt-3">Minesweeper</h1>
+    </v-app-bar>
+    <v-main>
+      <h1 class="text-h3 text-center pt-3">Minesweeper</h1>
       <router-view/>
-    </v-content>
+    </v-main>
   </v-app>
 </template>
 
-<script>
-export default {
-  name: 'App',
-  components: {
-  },
-  data () {
-    return {
-      //
-    }
-  }
-}
+<script setup>
+import logo from './assets/logo.png'
 </script>

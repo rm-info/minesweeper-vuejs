@@ -1,19 +1,11 @@
-import Vue from 'vue'
-import './plugins/vuetify'
+import { createApp } from 'vue'
 import App from './App.vue'
 import router from './router'
-import Vuelidate from 'vuelidate'
+import vuetify from './plugins/vuetify'
 
-const activatedLogs = false;
-export function consoleLog(log) {
-  activatedLogs && console.log(log);
-};
+const app = createApp(App)
 
-Vue.config.productionTip = false
+app.use(router)
+app.use(vuetify)
 
-Vue.use(Vuelidate)
-
-new Vue({
-  router,
-  render: function (h) { return h(App) }
-}).$mount('#app')
+app.mount('#app')
