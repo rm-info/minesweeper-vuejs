@@ -80,30 +80,34 @@
         </v-col>
 
         <v-col cols="12" class="d-flex justify-center">
-          <table class="pa-0 ma-0">
-            <tr v-for="(line, idx) in board" :key="idx" class="pa-0 ma-0">
-              <td v-for="(cell, idy) in line" :key="idy" class="pa-0 ma-0">
-                <v-btn
-                  :color="!cell.flipped ? cell.color : 'grey'"
-                  size="small"
-                  class="pa-0 ma-0 cell"
-                  :style="{minWidth:zoom+'em',minHeight:zoom+'em',width:zoom+'em',height:zoom+'em',maxWidth:zoom+'em',maxHeight:zoom+'em'}"
-                  @dblclick.left.prevent="discoverAroundCells(cell)"
-                  @click.left.prevent="flipCell(cell)"
-                  @click.right.prevent="flagCell(cell)"
-                  @click.middle.prevent="discoverAroundCells(cell)"
-                >
-                  <span v-if="!cell.flipped">
-                    <v-icon v-if="cell.icon" class="cellIcon pa-0 ma-0" :style="{fontSize:zoom+'em'}">mdi-{{ cell.icon }}</v-icon>
-                    <span v-if="cell.value > 0" :style="{fontSize:zoom+'em'}">{{ cell.value }}</span>
-                  </span>
-                  <span v-else>
-                    <v-icon v-if="cell.flag" :style="{fontSize:zoom+'em'}">mdi-flag</v-icon>
-                  </span>
-                </v-btn>
-              </td>
-            </tr>
-          </table>
+          <div class="game-board">
+            <div v-for="(line, idx) in board" :key="idx" class="board-row">
+              <div
+                v-for="(cell, idy) in line"
+                :key="idy"
+                class="cell"
+                :class="{ 'cell-flipped': !cell.flipped, 'cell-covered': cell.flipped }"
+                :style="{
+                  width: zoom + 'em',
+                  height: zoom + 'em',
+                  backgroundColor: !cell.flipped ? getCellColor(cell.color) : '#9e9e9e'
+                }"
+                @dblclick.left.prevent="discoverAroundCells(cell)"
+                @click.left.prevent="flipCell(cell)"
+                @click.right.prevent="flagCell(cell)"
+                @contextmenu.prevent
+                @click.middle.prevent="discoverAroundCells(cell)"
+              >
+                <span v-if="!cell.flipped" class="cell-content" :style="{fontSize: zoom + 'em'}">
+                  <span v-if="cell.icon" class="cell-icon">{{ getIconEmoji(cell.icon) }}</span>
+                  <span v-else-if="cell.value > 0" class="cell-value">{{ cell.value }}</span>
+                </span>
+                <span v-else class="cell-content" :style="{fontSize: zoom + 'em'}">
+                  <span v-if="cell.flag" class="cell-icon">🚩</span>
+                </span>
+              </div>
+            </div>
+          </div>
         </v-col>
         <v-col cols="12" v-if="board.length===0">
           <p class="text-h6 text-center text-grey">Click Start to play</p>
@@ -114,7 +118,7 @@
 </template>
 
 <script setup>
-import { ref, reactive, computed, watch, onActivated, onDeactivated } from 'vue'
+import { ref, shallowRef, reactive, computed, watch, onActivated, onDeactivated } from 'vue'
 import { useVuelidate } from '@vuelidate/core'
 import { required, numeric, between } from '@vuelidate/validators'
 
@@ -125,7 +129,7 @@ const EMPTY_CELL = 0
 const width = reactive({ value: 10, default: 10 })
 const height = reactive({ value: 10, default: 10 })
 const percMines = reactive({ value: 10, default: 10 })
-const board = ref([])
+const board = shallowRef([])  // Shallow ref for better performance
 const zoom = ref(1.5)
 const nbMinesLeft = ref(null)
 const gameOver = ref(true)
@@ -289,6 +293,27 @@ onActivated(() => {
   resumeGame()
 })
 
+// Helper functions for rendering
+function getCellColor(colorName) {
+  const colorMap = {
+    'green-lighten-4': '#C8E6C9',
+    'green-lighten-3': '#A5D6A7',
+    'green-lighten-2': '#81C784',
+    'green-lighten-1': '#66BB6A',
+    'green': '#4CAF50',
+    'green-darken-1': '#43A047',
+    'green-darken-2': '#388E3C',
+    'green-darken-3': '#2E7D32',
+    'green-darken-4': '#1B5E20',
+    'warning': '#FB8C00'
+  }
+  return colorMap[colorName] || '#9e9e9e'
+}
+
+function getIconEmoji(icon) {
+  return icon === 'fire' ? '💥' : ''
+}
+
 function setColor(cell) {
   switch (cell.value) {
     case EMPTY_CELL: cell.color = "green-lighten-4"; break
@@ -310,6 +335,9 @@ function flipCell(cell) {
     return
   }
   cell.flipped = false
+  // Trigger reactivity update
+  board.value = [...board.value]
+
   if (cell.value === MINE_VALUE) {
     gameOver.value = true
     clearInterval(stopTime.value)
@@ -327,6 +355,8 @@ function flagCell(cell) {
   if (!cell.flipped) return
   cell.flag = !cell.flag
   cell.flag ? nbMinesLeft.value-- : nbMinesLeft.value++
+  // Trigger reactivity update
+  board.value = [...board.value]
 }
 
 function discoverAroundCells(cell) {
@@ -378,22 +408,60 @@ function solveGame() {
 </script>
 
 <style lang="scss" scoped>
-.cell {
-  padding: 0 !important;
-  margin: 1px !important;
-  border-radius: 4px !important;
-  min-width: unset !important;
-  min-height: unset !important;
+.game-board {
+  display: inline-block;
+  user-select: none;
 }
 
-table {
-  border-spacing: 0;
-  border-collapse: collapse;
-}
-
-td {
-  padding: 0;
-  margin: 0;
+.board-row {
+  display: flex;
   line-height: 0;
+}
+
+.cell {
+  margin: 1px;
+  border-radius: 4px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-weight: bold;
+  transition: transform 0.05s;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+
+  &:active {
+    transform: scale(0.95);
+  }
+
+  &:hover {
+    filter: brightness(1.1);
+  }
+}
+
+.cell-content {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+}
+
+.cell-icon {
+  font-size: 0.7em;
+  line-height: 1;
+}
+
+.cell-value {
+  font-size: 0.6em;
+  line-height: 1;
+  font-weight: bold;
+}
+
+.cell-covered {
+  background: linear-gradient(135deg, #bdbdbd 0%, #9e9e9e 100%);
+}
+
+.cell-flipped {
+  box-shadow: inset 0 1px 3px rgba(0,0,0,0.3);
 }
 </style>
