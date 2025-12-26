@@ -1,7 +1,7 @@
 <template>
   <v-app>
     <v-app-bar app>
-      <v-btn icon to="/" :ripple="false" class="logo-btn">
+      <v-btn icon @click="$router.push('/')" :ripple="false" class="logo-btn">
         <v-img :src="logo" width="40"></v-img>
       </v-btn>
       <v-toolbar-title>
