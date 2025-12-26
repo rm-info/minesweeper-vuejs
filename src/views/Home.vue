@@ -118,7 +118,7 @@
 </template>
 
 <script setup>
-import { ref, shallowRef, reactive, computed, watch, onActivated, onDeactivated } from 'vue'
+import { ref, shallowRef, reactive, computed, watch, onActivated, onDeactivated, triggerRef } from 'vue'
 import { useVuelidate } from '@vuelidate/core'
 import { required, numeric, between } from '@vuelidate/validators'
 
@@ -335,12 +335,11 @@ function flipCell(cell) {
     return
   }
   cell.flipped = false
-  // Trigger reactivity update
-  board.value = [...board.value]
 
   if (cell.value === MINE_VALUE) {
     gameOver.value = true
     clearInterval(stopTime.value)
+    triggerRef(board)
     return
   }
   if (cell.value === EMPTY_CELL) {
@@ -348,6 +347,7 @@ function flipCell(cell) {
       flipCell(newCell)
     })
   }
+  triggerRef(board)
 }
 
 function flagCell(cell) {
@@ -355,8 +355,7 @@ function flagCell(cell) {
   if (!cell.flipped) return
   cell.flag = !cell.flag
   cell.flag ? nbMinesLeft.value-- : nbMinesLeft.value++
-  // Trigger reactivity update
-  board.value = [...board.value]
+  triggerRef(board)
 }
 
 function discoverAroundCells(cell) {
