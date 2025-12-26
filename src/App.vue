@@ -1,7 +1,7 @@
 <template>
   <v-app>
     <v-app-bar app>
-      <v-btn icon disabled>
+      <v-btn icon to="/">
         <v-img :src="logo" width="40"></v-img>
       </v-btn>
       <v-toolbar-title>

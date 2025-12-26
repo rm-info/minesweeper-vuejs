@@ -40,7 +40,7 @@ const topics = [
     list:[
       "The field is pictured as a board of tiles or cells.",
       "Start with choosing your field dimensions.",
-      "The third input let you customize the density of mines in the field.",
+      "The third input lets you customize the density of mines in the field.",
       "<span><i><u>Remember:</u> The more mines you want, the harder it will be.</i></span>",
       "<span>Then <b>Start</b>!</span>",
       "The number of mines you still have to find is shown",
@@ -51,7 +51,7 @@ const topics = [
       "<span><b>Middle click</b> or <b>Double click</b> on a revealed tile to find out what's around</span>",
       "---",
       "<span><b>Start</b> cancels any current game and starts a new one with custom settings</span>",
-      "<span><b>Reset</b> cancels any current game and reset the settings to default</span>",
+      "<span><b>Reset</b> cancels any current game and resets the settings to default</span>",
       "<span><b>Resolve</b> ends the game (meaning you lose) and shows the entire field</span>"
     ]
   },

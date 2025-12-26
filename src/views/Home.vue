@@ -340,4 +340,22 @@ function solveGame() {
 </script>
 
 <style lang="scss" scoped>
+.cell {
+  padding: 0 !important;
+  margin: 0 !important;
+  border-radius: 0 !important;
+  min-width: unset !important;
+  min-height: unset !important;
+}
+
+table {
+  border-spacing: 0;
+  border-collapse: collapse;
+}
+
+td {
+  padding: 0;
+  margin: 0;
+  line-height: 0;
+}
 </style>
