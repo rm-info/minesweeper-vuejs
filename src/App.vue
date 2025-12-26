@@ -35,4 +35,11 @@ import logo from './assets/logo.png'
 .logo-btn::before {
   display: none !important;
 }
+.logo-btn.v-btn--active {
+  background-color: transparent !important;
+  opacity: 1 !important;
+}
+.logo-btn.v-btn--active::before {
+  opacity: 0 !important;
+}
 </style>
