@@ -139,9 +139,33 @@ const stopTime = ref(null)
 const isPaused = ref(false)
 
 // Validation rules
+const maxCells = (value, siblings) => {
+  return siblings.width.value * siblings.height.value <= 1000
+}
+
 const rules = {
-  width: { value: { required, numeric, between: between(2, 40) } },
-  height: { value: { required, numeric, between: between(2, 40) } },
+  width: {
+    value: {
+      required,
+      numeric,
+      between: between(2, 40),
+      maxCells: {
+        $validator: maxCells,
+        $message: 'Total cells (width × height) must not exceed 1000'
+      }
+    }
+  },
+  height: {
+    value: {
+      required,
+      numeric,
+      between: between(2, 40),
+      maxCells: {
+        $validator: maxCells,
+        $message: 'Total cells (width × height) must not exceed 1000'
+      }
+    }
+  },
   percMines: { value: { required, numeric, between: between(1, 100) } }
 }
 
@@ -154,6 +178,7 @@ const widthErrors = computed(() => {
   !v$.value.width.value.required && errors.push('is required and must be numeric')
   !v$.value.width.value.numeric && errors.push('must be a positive integer')
   !v$.value.width.value.between && errors.push('must be between 2 and 40')
+  !v$.value.width.value.maxCells && errors.push('Max 1000 cells total (width × height)')
   return errors
 })
 
@@ -163,6 +188,7 @@ const heightErrors = computed(() => {
   !v$.value.height.value.required && errors.push('is required and must be numeric')
   !v$.value.height.value.numeric && errors.push('must be a positive integer')
   !v$.value.height.value.between && errors.push('must be between 2 and 40')
+  !v$.value.height.value.maxCells && errors.push('Max 1000 cells total (width × height)')
   return errors
 })
 
