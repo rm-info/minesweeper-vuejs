@@ -43,7 +43,7 @@
             ></v-text-field>
           </v-col>
           <v-col cols="auto">
-            <v-btn color="success" type="submit" size="small">Start</v-btn>
+            <v-btn color="success" type="submit" size="small" :disabled="cellLimitExceeded">Start</v-btn>
           </v-col>
           <v-col cols="auto">
             <v-btn color="error" @click="resetToDefault()" size="small">Reset</v-btn>
@@ -59,6 +59,11 @@
             <v-btn @click="zoom > 2 ? zoom-=0.5 : zoom=1.5" icon size="small" variant="text">
               <v-icon size="small">mdi-magnify-minus</v-icon>
             </v-btn>
+          </v-col>
+        </v-row>
+        <v-row v-if="cellLimitExceeded" dense justify="center">
+          <v-col cols="auto">
+            <span class="text-error text-caption">⚠️ Maximum 1000 cells total ({{ totalCells }} cells = {{ width.value }}×{{ height.value }})</span>
           </v-col>
         </v-row>
       </v-form>
@@ -139,31 +144,19 @@ const stopTime = ref(null)
 const isPaused = ref(false)
 
 // Validation rules
-const maxCells = () => {
-  return width.value * height.value <= 1000
-}
-
 const rules = {
   width: {
     value: {
       required,
       numeric,
-      between: between(2, 40),
-      maxCells: {
-        $validator: maxCells,
-        $message: 'Total cells (width × height) must not exceed 1000'
-      }
+      between: between(2, 40)
     }
   },
   height: {
     value: {
       required,
       numeric,
-      between: between(2, 40),
-      maxCells: {
-        $validator: maxCells,
-        $message: 'Total cells (width × height) must not exceed 1000'
-      }
+      between: between(2, 40)
     }
   },
   percMines: { value: { required, numeric, between: between(1, 100) } }
@@ -171,16 +164,9 @@ const rules = {
 
 const v$ = useVuelidate(rules, { width, height, percMines })
 
-// Watch width and height to re-validate both when either changes (for maxCells validator)
-watch(() => width.value, () => {
-  v$.value.width.value.$touch()
-  v$.value.height.value.$touch()
-})
-
-watch(() => height.value, () => {
-  v$.value.width.value.$touch()
-  v$.value.height.value.$touch()
-})
+// Manual validation for cell limit
+const totalCells = computed(() => width.value * height.value)
+const cellLimitExceeded = computed(() => totalCells.value > 1000)
 
 // Computed
 const widthErrors = computed(() => {
@@ -189,7 +175,6 @@ const widthErrors = computed(() => {
   !v$.value.width.value.required && errors.push('is required and must be numeric')
   !v$.value.width.value.numeric && errors.push('must be a positive integer')
   !v$.value.width.value.between && errors.push('must be between 2 and 40')
-  !v$.value.width.value.maxCells && errors.push('Max 1000 cells total (width × height)')
   return errors
 })
 
@@ -199,7 +184,6 @@ const heightErrors = computed(() => {
   !v$.value.height.value.required && errors.push('is required and must be numeric')
   !v$.value.height.value.numeric && errors.push('must be a positive integer')
   !v$.value.height.value.between && errors.push('must be between 2 and 40')
-  !v$.value.height.value.maxCells && errors.push('Max 1000 cells total (width × height)')
   return errors
 })
 
@@ -227,6 +211,7 @@ function dec2(e) {
 function startNewGame() {
   v$.value.$touch()
   if (widthErrors.value.length || heightErrors.value.length || percMinesErrors.value.length) return
+  if (cellLimitExceeded.value) return
 
   board.value = []
   for (let i = 0; i < height.value; i++) {
