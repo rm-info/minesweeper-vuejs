@@ -139,8 +139,8 @@ const stopTime = ref(null)
 const isPaused = ref(false)
 
 // Validation rules
-const maxCells = (value, siblings, vm) => {
-  return vm.width.value * vm.height.value <= 1000
+const maxCells = () => {
+  return width.value * height.value <= 1000
 }
 
 const rules = {
