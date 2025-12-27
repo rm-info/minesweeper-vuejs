@@ -171,6 +171,17 @@ const rules = {
 
 const v$ = useVuelidate(rules, { width, height, percMines })
 
+// Watch width and height to re-validate both when either changes (for maxCells validator)
+watch(() => width.value, () => {
+  v$.value.width.value.$touch()
+  v$.value.height.value.$touch()
+})
+
+watch(() => height.value, () => {
+  v$.value.width.value.$touch()
+  v$.value.height.value.$touch()
+})
+
 // Computed
 const widthErrors = computed(() => {
   const errors = []
